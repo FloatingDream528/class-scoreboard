@@ -404,9 +404,11 @@ app.put("/api/settings/pin", (req, res) => {
 
 // ─── 静态文件 + SPA Fallback ───
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const distPath = path.resolve(__dirname, "../dist");
+// ESM 和 CJS 兼容的 __dirname
+const __server_dirname = typeof __dirname !== "undefined"
+  ? __dirname
+  : path.dirname(fileURLToPath(import.meta.url));
+const distPath = path.resolve(__server_dirname, "../dist");
 app.use(express.static(distPath));
 app.get("/{*splat}", (_req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
