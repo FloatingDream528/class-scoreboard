@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  scoreboard:
+    image: ghcr.io/floatingdream528/class-scoreboard:latest
+    container_name: class-scoreboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - scoreboard-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+
+volumes:
+  scoreboard-data:
