@@ -967,6 +967,8 @@ th {
   margin-bottom: 16px;
   text-align: center;
   color: var(--text);
+  position: relative;
+  z-index: 2;
 }
 
 /* ─── Panel 0: Summary Dashboard ─── */
@@ -1018,6 +1020,7 @@ th {
   gap: 16px;
   flex: 1;
   padding-bottom: 8px;
+  padding-top: 40px;
   min-height: 0;
 }
 
