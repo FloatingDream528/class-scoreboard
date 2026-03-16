@@ -1020,7 +1020,7 @@ th {
   gap: 16px;
   flex: 1;
   padding-bottom: 8px;
-  padding-top: 40px;
+  padding-top: 16px;
   min-height: 0;
 }
 
@@ -1032,13 +1032,13 @@ th {
 }
 
 .pp-podium-avatar {
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #fff;
   margin-bottom: 6px;
@@ -1048,9 +1048,9 @@ th {
 .pp-podium-block--gold .pp-podium-avatar {
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
-  width: 88px;
-  height: 88px;
-  font-size: 2.2rem;
+  width: 68px;
+  height: 68px;
+  font-size: 1.8rem;
 }
 
 .pp-podium-block--silver .pp-podium-avatar {
@@ -1088,25 +1088,25 @@ th {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 900;
   margin-top: 6px;
 }
 
 .pp-podium-block--gold .pp-podium-base {
-  height: 110px;
+  height: 70px;
   background: linear-gradient(180deg, rgba(251, 191, 36, 0.18), rgba(251, 191, 36, 0.05));
   border: 2px solid rgba(251, 191, 36, 0.3);
 }
 
 .pp-podium-block--silver .pp-podium-base {
-  height: 80px;
+  height: 50px;
   background: linear-gradient(180deg, rgba(156, 163, 175, 0.18), rgba(156, 163, 175, 0.05));
   border: 2px solid rgba(156, 163, 175, 0.3);
 }
 
 .pp-podium-block--bronze .pp-podium-base {
-  height: 60px;
+  height: 35px;
   background: linear-gradient(180deg, rgba(217, 119, 6, 0.15), rgba(217, 119, 6, 0.04));
   border: 2px solid rgba(217, 119, 6, 0.25);
 }
@@ -1461,22 +1461,22 @@ th {
   }
 
   .pp-podium-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 1.3rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
   }
 
   .pp-podium-block--gold .pp-podium-avatar {
-    width: 64px;
-    height: 64px;
-    font-size: 1.5rem;
+    width: 54px;
+    height: 54px;
+    font-size: 1.3rem;
   }
 
   .pp-podium-name { font-size: 0.9rem; }
   .pp-podium-score { font-size: 1rem; }
-  .pp-podium-block--gold .pp-podium-base { height: 80px; }
-  .pp-podium-block--silver .pp-podium-base { height: 60px; }
-  .pp-podium-block--bronze .pp-podium-base { height: 45px; }
+  .pp-podium-block--gold .pp-podium-base { height: 55px; }
+  .pp-podium-block--silver .pp-podium-base { height: 40px; }
+  .pp-podium-block--bronze .pp-podium-base { height: 28px; }
 
   .pp-today-layout {
     grid-template-columns: 1fr;
