@@ -12,6 +12,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - ACCESS_PASSWORD=your_password_here  # 改成你的访问密码，留空则不启用
 
 volumes:
   scoreboard-data:

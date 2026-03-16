@@ -1,14 +1,121 @@
 import express from "express";
 import cors from "cors";
+import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
 import * as db from "./db";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || "";
+const COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30天
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: false }));
+
+// ─── 访问密码保护 ───
+
+function generateToken(password: string): string {
+  return crypto.createHash("sha256").update(`scoreboard:${password}`).digest("hex").slice(0, 32);
+}
+
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  if (!cookieHeader) return {};
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(";").forEach((c) => {
+    const [key, ...rest] = c.trim().split("=");
+    if (key) cookies[key] = rest.join("=");
+  });
+  return cookies;
+}
+
+const LOGIN_PAGE = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>班级积分榜 - 访问验证</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .card {
+      background: #fff; border-radius: 20px; padding: 48px 40px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08); text-align: center;
+      max-width: 380px; width: 90%;
+    }
+    .icon { font-size: 3rem; margin-bottom: 12px; }
+    h1 { font-size: 1.4rem; color: #1e293b; margin-bottom: 6px; }
+    .sub { font-size: 0.9rem; color: #94a3b8; margin-bottom: 24px; }
+    input {
+      width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0;
+      border-radius: 12px; font-size: 1.1rem; text-align: center;
+      letter-spacing: 4px; outline: none; transition: border-color 0.2s;
+    }
+    input:focus { border-color: #0d9488; }
+    button {
+      width: 100%; padding: 14px; margin-top: 16px; border: none;
+      border-radius: 12px; background: linear-gradient(135deg, #0d9488, #0f766e);
+      color: #fff; font-size: 1.1rem; font-weight: 600; cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(13,148,136,0.3); }
+    button:active { transform: translateY(0); }
+    .error { color: #dc2626; font-size: 0.9rem; margin-top: 12px; display: none; }
+    .error.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🔒</div>
+    <h1>班级积分榜</h1>
+    <p class="sub">请输入访问密码</p>
+    <form method="POST" action="/__auth">
+      <input type="password" name="password" placeholder="输入密码" autofocus required />
+      <button type="submit">进入系统</button>
+    </form>
+    <p class="error __ERR__">密码错误，请重试</p>
+  </div>
+</body>
+</html>`;
+
+if (ACCESS_PASSWORD) {
+  const validToken = generateToken(ACCESS_PASSWORD);
+
+  // 认证中间件（包含登录处理）
+  app.use((req, res, next) => {
+    // 处理登录提交
+    if (req.path === "/__auth" && req.method === "POST") {
+      const password = req.body?.password;
+      if (password === ACCESS_PASSWORD) {
+        res.setHeader(
+          "Set-Cookie",
+          `sb_token=${validToken}; Path=/; Max-Age=${COOKIE_MAX_AGE / 1000}; HttpOnly; SameSite=Lax`
+        );
+        res.redirect("/");
+      } else {
+        res.status(401).send(LOGIN_PAGE.replace('__ERR__"', '__ERR__ show"'));
+      }
+      return;
+    }
+
+    // 检查 cookie
+    const cookies = parseCookies(req.headers.cookie);
+    if (cookies.sb_token === validToken) return next();
+
+    // 未认证 → API 返回 401，页面返回登录表单
+    if (req.path.startsWith("/api/")) {
+      return res.status(401).json({ error: "未授权访问" });
+    }
+    res.send(LOGIN_PAGE.replace(' __ERR__"', '"'));
+  });
+
+  console.log("[server] 🔒 访问密码保护已启用");
+}
 
 // ─── API 路由 ───
 
