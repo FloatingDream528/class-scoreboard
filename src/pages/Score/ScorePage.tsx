@@ -18,14 +18,24 @@ export default function ScorePage() {
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [batchMode, setBatchMode] = useState(false);
+  const [sortMode, setSortMode] = useState<"group" | "az">("group");
 
-  const students = useMemo(
-    () =>
-      data.students.filter(
-        (s) => s.active && (groupFilter === "all" || s.groupId === groupFilter)
-      ),
-    [data.students, groupFilter]
-  );
+  const students = useMemo(() => {
+    const filtered = data.students.filter(
+      (s) => s.active && (groupFilter === "all" || s.groupId === groupFilter)
+    );
+    if (sortMode === "az") {
+      return [...filtered].sort((a, b) => a.name.localeCompare(b.name, "zh-CN"));
+    }
+    // 按组排序：先按组 sortOrder，再按学生 sortOrder
+    return [...filtered].sort((a, b) => {
+      const ga = data.groups.find((g) => g.id === a.groupId);
+      const gb = data.groups.find((g) => g.id === b.groupId);
+      const gOrder = (ga?.sortOrder ?? 0) - (gb?.sortOrder ?? 0);
+      if (gOrder !== 0) return gOrder;
+      return a.sortOrder - b.sortOrder;
+    });
+  }, [data.students, data.groups, groupFilter, sortMode]);
 
   const selectedRule = rules.find((r) => r.id === selectedRuleId);
 
@@ -167,18 +177,27 @@ export default function ScorePage() {
         <Card>
           <div className="select-line">
             <h3 style={{ margin: 0 }}>👤 选择学生</h3>
-            <select
-              value={groupFilter}
-              onChange={(e) => {
-                setGroupFilter(e.target.value);
-                setSelectedStudents([]);
-              }}
-            >
-              <option value="all">全部小组</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>{g.name}</option>
-              ))}
-            </select>
+            <div style={{ display: "flex", gap: 8 }}>
+              <select
+                value={groupFilter}
+                onChange={(e) => {
+                  setGroupFilter(e.target.value);
+                  setSelectedStudents([]);
+                }}
+              >
+                <option value="all">全部小组</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as "group" | "az")}
+              >
+                <option value="group">按组排列</option>
+                <option value="az">按拼音 A-Z</option>
+              </select>
+            </div>
           </div>
 
           {batchMode && (
