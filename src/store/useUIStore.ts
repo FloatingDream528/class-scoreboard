@@ -25,7 +25,7 @@ interface UIStore {
 }
 
 export const useUIStore = create<UIStore>((set) => ({
-  currentView: "board",
+  currentView: "public",
   setView: (view) => set({ currentView: view }),
 
   manageUnlocked: false,

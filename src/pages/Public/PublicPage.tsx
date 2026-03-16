@@ -2,9 +2,6 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   motion,
   AnimatePresence,
-  useMotionValue,
-  useTransform,
-  animate,
   type Variants,
 } from "framer-motion";
 import {
@@ -21,20 +18,18 @@ import { useStudentRanking } from "../../hooks/useStudentRanking";
 import { useGroupRanking } from "../../hooks/useGroupRanking";
 import { useGroupTrend } from "../../hooks/useGroupTrend";
 import { useGroupContributors } from "../../hooks/useGroupContributors";
-import { useSummary } from "../../hooks/useSummary";
 import { withSign } from "../../utils/helpers";
 import type {
   StudentRankRow,
   GroupRankRow,
   GroupContribution,
   GroupTrendRow,
-  Summary,
 } from "../../types";
 
 /* ─── Constants ─── */
-const PANEL_COUNT = 5;
-const PANEL_NAMES = ["📊 数据总览", "🏅 个人排行", "👥 小组排行", "📈 积分趋势", "⭐ 今日之星"];
-const PANEL_DURATIONS = [8000, 12000, 10000, 10000, 10000];
+const PANEL_COUNT = 4;
+const PANEL_NAMES = ["🏅 个人排行", "👥 小组排行", "📈 积分趋势", "⭐ 今日之星"];
+const PANEL_DURATIONS = [12000, 10000, 10000, 10000];
 const GROUP_COLORS = [
   "#0f766e", "#1d4ed8", "#dc2626", "#f59e0b", "#8b5cf6", "#ec4899",
   "#06b6d4", "#84cc16",
@@ -106,48 +101,6 @@ function useClock(): string {
   const m = String(now.getMinutes()).padStart(2, "0");
   const s = String(now.getSeconds()).padStart(2, "0");
   return `${h}:${m}:${s}`;
-}
-
-/* ─── Animated Number ─── */
-function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
-  const motionVal = useMotionValue(0);
-  const rounded = useTransform(motionVal, (v) => Math.round(v));
-  const [display, setDisplay] = useState("0");
-
-  useEffect(() => {
-    const controls = animate(motionVal, value, { duration: 1.5, ease: "easeOut" });
-    const unsub = rounded.on("change", (v) => setDisplay(`${v}${suffix}`));
-    return () => { controls.stop(); unsub(); };
-  }, [value, suffix, motionVal, rounded]);
-
-  return <span>{display}</span>;
-}
-
-/* ─── Panel 0: Summary Dashboard ─── */
-function SummaryDashboard({ summary }: { summary: Summary }) {
-  const cards = [
-    { icon: "🏆", label: "总积分", value: summary.totalScore, gradient: "linear-gradient(135deg, #e0f2fe, #f0fdf4)" },
-    { icon: "📅", label: "今日积分", value: summary.todayScore, gradient: "linear-gradient(135deg, #f0fdf4, #ecfdf5)" },
-    { icon: "📆", label: "本周积分", value: summary.weekScore, gradient: "linear-gradient(135deg, #fefce8, #fff7ed)" },
-    { icon: "📝", label: "记录总数", value: summary.validRecords, gradient: "linear-gradient(135deg, #f5f3ff, #ede9fe)" },
-  ];
-
-  return (
-    <>
-      <h2 className="pp-panel-title">📊 数据总览</h2>
-      <motion.div className="pp-summary-grid" variants={staggerContainer} initial="hidden" animate="show">
-        {cards.map((c) => (
-          <motion.div key={c.label} className="pp-summary-card" variants={staggerItem} style={{ background: c.gradient }}>
-            <div className="pp-summary-icon">{c.icon}</div>
-            <div className="pp-summary-value">
-              <AnimatedNumber value={c.value} />
-            </div>
-            <div className="pp-summary-label">{c.label}</div>
-          </motion.div>
-        ))}
-      </motion.div>
-    </>
-  );
 }
 
 /* ─── Panel 1: Student Ranking with Podium ─── */
@@ -422,7 +375,6 @@ export default function PublicPage() {
   const groupRanks = useGroupRanking("week");
   const trend = useGroupTrend(7);
   const contributions = useGroupContributors("week");
-  const summary = useSummary();
 
   const topStudents = useMemo(() => weekStudents.slice(0, 10), [weekStudents]);
   const todayTop = useMemo(() => todayStudents.slice(0, 10), [todayStudents]);
@@ -461,11 +413,10 @@ export default function PublicPage() {
 
   const renderPanel = (i: number) => {
     switch (i) {
-      case 0: return <SummaryDashboard summary={summary} />;
-      case 1: return <StudentRankPanel students={topStudents} />;
-      case 2: return <GroupRankPanel groups={groupRanks} />;
-      case 3: return <TrendChartPanel trend={trend} />;
-      case 4: return <TodayStarPanel todayStudents={todayTop} contributions={contributions} />;
+      case 0: return <StudentRankPanel students={topStudents} />;
+      case 1: return <GroupRankPanel groups={groupRanks} />;
+      case 2: return <TrendChartPanel trend={trend} />;
+      case 3: return <TodayStarPanel todayStudents={todayTop} contributions={contributions} />;
       default: return null;
     }
   };
